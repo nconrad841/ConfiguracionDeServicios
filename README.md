@@ -8,6 +8,8 @@ Links:
 - https://github.com/playma/simple_dhcp
 - https://docs.microsoft.com/en-us/windows-server/troubleshoot/dynamic-host-configuration-protocol-basics
 - https://www.geeksforgeeks.org/dynamic-host-configuration-protocol-dhcp/
+- https://www.netmanias.com/en/post/techdocs/5998/dhcp-network-protocol/understanding-the-basic-operations-of-dhcp
+- https://pypi.org/project/dhcppython/
 
 Que es?
 - Differencias de orientado a la conexión y no orientado a la conexión?????
