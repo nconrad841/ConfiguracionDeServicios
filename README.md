@@ -4,6 +4,10 @@ Links:
 - https://levelup.gitconnected.com/learn-python-by-building-a-multi-user-group-chat-gui-application-af3fa1017689
 - https://www.youtube.com/watch?v=MEKBzxL8xHI
 - https://github.com/effiongcharles/multi_user_chat_application_in_python
+- https://www.youtube.com/watch?v=T5uooejI3XY
+- https://github.com/playma/simple_dhcp
+- https://docs.microsoft.com/en-us/windows-server/troubleshoot/dynamic-host-configuration-protocol-basics
+- https://www.geeksforgeeks.org/dynamic-host-configuration-protocol-dhcp/
 
 Que es?
 - Differencias de orientado a la conexión y no orientado a la conexión?????
