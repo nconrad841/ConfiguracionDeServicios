@@ -37,6 +37,7 @@ class DHCP_server(object):
                     yiaddr=ipaddress.IPv4Address(ip))
                 data = data.asbytes
                 s.sendto(data, dest)
+                
                 while 1:
                     try:
                         print("Wait DHCP request.")
