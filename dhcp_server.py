@@ -16,7 +16,6 @@ class DHCP_server(object):
         
         s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST,1)
         s.bind(('', serverPort))
         dest = ('255.255.255.255', clientPort)
 

@@ -10,6 +10,8 @@ Links:
 - https://www.geeksforgeeks.org/dynamic-host-configuration-protocol-dhcp/
 - https://www.netmanias.com/en/post/techdocs/5998/dhcp-network-protocol/understanding-the-basic-operations-of-dhcp
 - https://pypi.org/project/dhcppython/
+- https://realpython.com/python-sockets/
+
 
 Que es?
 - Differencias de orientado a la conexión y no orientado a la conexión?????
