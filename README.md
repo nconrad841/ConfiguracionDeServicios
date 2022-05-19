@@ -32,3 +32,7 @@ Client should contain / be able to do:
 - created_at - Date
 - updated_at - Date
 - messages - Date + String
+
+TODO:
+- Optimze client terminal (enter data & chatmembers are overlapping)
+- able to send so specific members messages (optional)

@@ -6,6 +6,7 @@ import dhcppython
 import tkinter as tk
 from tkinter import messagebox
 import threading
+import time
 
 HOST_ADDR = "127.0.0.1"
 HOST_PORT = 8080
@@ -36,7 +37,7 @@ def manage_username(client):
             client.send(username.encode())
             resp = client.recv(4096).decode()
             if 'Connection successfull' in resp:
-                print(f'Username \'{username}\' accepted by the server')
+                print(f'Username \'{username}\' accepted by the server')                
                 break
             else:
                 print(f'Username already in usage, choose new name')
@@ -59,13 +60,16 @@ def send_message_to_server(msg):
     client.send(client_msg.encode())
     if msg == "exit":
         client.close()
-        exit()
-    print("Sending message")
+        exit()    
 
 
 
 # welcome message
-print(f'You have the following options:\n\t\'exit\' for closing the connection\n\t\'-> <USERNAME>: \' for sending a message to only one member')
+commands = f'You have the following options:\n\t'
+commands += f'\'info\' for getting info about other users\n\t'
+commands += f'\'-> <USERNAME>: \' for sending a message to only one member\n\t'
+commands += f'\'exit\' for closing the connection'
+print(commands)
 #msg = input("Enter name : ")
 
 connect()
