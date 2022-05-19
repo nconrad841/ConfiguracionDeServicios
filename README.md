@@ -11,6 +11,7 @@ Links:
 - https://www.netmanias.com/en/post/techdocs/5998/dhcp-network-protocol/understanding-the-basic-operations-of-dhcp
 - https://pypi.org/project/dhcppython/
 - https://realpython.com/python-sockets/
+- https://www.tutorialspoint.com/python3/python_multithreading.htm
 
 
 Que es?
