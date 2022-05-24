@@ -24,6 +24,7 @@ Server should contain / be able to do:
 - Receive Messages
 - clients_List - Array<Objects> (IPs, Names)
 
+------------------------------------
 
 Client should contain / be able to do:
 - Send messages
@@ -36,3 +37,4 @@ Client should contain / be able to do:
 TODO:
 - Optimze client terminal (enter data & chatmembers are overlapping)
 - able to send so specific members messages (optional)
+- create tests for the 3 attributes

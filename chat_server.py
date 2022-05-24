@@ -90,7 +90,13 @@ def send_receive_client_message(client_connected, client_ip_addr):
             if data == 'exit': break
             if data == 'info': inform_clients_about_others(client_connected)
 
-            print(f'{client_name}\t{data}')
+            msg = f'\'{client_name}\':\t{data}'
+            print(msg)
+            
+            # send message to all
+            for client in clients:
+                client.send(msg.encode())
+
 
 def inform_clients_about_others(client_connected):
     global clients_names, clients

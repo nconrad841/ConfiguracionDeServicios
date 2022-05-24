@@ -67,10 +67,9 @@ def send_message_to_server(msg):
 # welcome message
 commands = f'You have the following options:\n\t'
 commands += f'\'info\' for getting info about other users\n\t'
-commands += f'\'-> <USERNAME>: \' for sending a message to only one member\n\t'
+#commands += f'\'-> <USERNAME>: \' for sending a message to only one member\n\t'
 commands += f'\'exit\' for closing the connection'
 print(commands)
-#msg = input("Enter name : ")
 
 connect()
 while True:
