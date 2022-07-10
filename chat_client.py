@@ -7,12 +7,13 @@ import tkinter as tk
 from tkinter import messagebox
 import threading
 import time
+import argparse
 
 HOST_ADDR = "127.0.0.1"
 HOST_PORT = 8080
 client = None
 
-username = "Testname"
+username = ""
 
 def connect():
     global client
@@ -30,7 +31,8 @@ def connect():
 def manage_username(client):
     global username
     while True:
-        username = input("Enter username : ")
+        if username == "":
+            username = input("Enter username : ")
         if len(username) < 1:
             print("Name should be longer than 1")
         else:
@@ -41,17 +43,22 @@ def manage_username(client):
                 break
             else:
                 print(f'Username already in usage, choose new name')
+                username = ""
 
 
 def receive_message_from_server(client_connected, not_used):
     while True:
         #connection still available
-        if client_connected.fileno() != -1:
+        if client_connected.fileno() == -1:
+            print(f'Client:\tConnection closed with Server')
+            break
+        try:
             msg_from_server = client_connected.recv(4096).decode()
             if msg_from_server:
                 print(f'{msg_from_server}')
-        else:
-            exit()
+        except ConnectionResetError:
+             print(f'Client:\tConnection closed with Server -> ConnectionResetError')
+             break
         
 
 def send_message_to_server(msg):
@@ -63,17 +70,25 @@ def send_message_to_server(msg):
         exit()    
 
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--username", '-u', help="Username", default="")
+    args = parser.parse_args()
+    username = args.username
 
-# welcome message
-commands = f'You have the following options:\n\t'
-commands += f'\'info\' for getting info about other users\n\t'
-#commands += f'\'-> <USERNAME>: \' for sending a message to only one member\n\t'
-commands += f'\'exit\' for closing the connection'
-print(commands)
+    if username != "":
+        print(f'Your username {username}')
 
-connect()
-while True:
-    msg = input('Enter your message: ')
-    if msg == 'exit':
-        exit()
-    send_message_to_server(msg)
+    # welcome message
+    commands = f'You have the following options:\n\t'
+    commands += f'\'info\' for getting info about other users\n\t'
+    #commands += f'\'-> <USERNAME>: \' for sending a message to only one member\n\t'
+    commands += f'\'exit\' for closing the connection'
+    print(commands)
+
+    connect()
+    while True:
+        msg = input('Enter your message: ')
+        if msg == 'exit':
+            exit()
+        send_message_to_server(msg)

@@ -2,22 +2,9 @@ from concurrent.futures import thread
 import socket
 import random
 from random import randint
-from time import sleep
-#import tkinter as tk
-#from tkinter import messagebox
+import time
+import datetime
 import threading
-
-
-class myThread (threading.Thread):
-   def __init__(self, threadID, name):
-      threading.Thread.__init__(self)
-      self.threadID = threadID
-      self.name = name
-   def run(self):
-      print ("Starting " + self.name)
-      
-      print ("Exiting " + self.name)
-
 
 server = None
 HOST_ADDR = "127.0.0.1"
@@ -73,14 +60,14 @@ def send_receive_client_message(client_connected, client_ip_addr):
 
         while True:
             if client_connected.fileno() == -1:
-                print(f'Server:\t Connection closed with {client_name}')
+                print(f'Server:\tConnection closed with {client_name}')
                 clients_names.remove(client_name)
                 clients.remove(client_connected)
                 break
             try:
                 data = client_connected.recv(4096).decode()
             except ConnectionResetError:
-                print(f'Server:\t Connection closed with {client_name} -> ConnectionResetError')
+                print(f'Server:\tConnection closed with {client_name} -> ConnectionResetError')
                 client_connected.close()
                 clients_names.remove(client_name)
                 clients.remove(client_connected)
@@ -88,7 +75,9 @@ def send_receive_client_message(client_connected, client_ip_addr):
 
             if not data: break
             if data == 'exit': break
-            if data == 'info': inform_clients_about_others(client_connected)
+            if data == 'info': 
+                inform_clients_about_others(client_connected)
+                continue
 
             msg = f'\'{client_name}\':\t{data}'
             print(msg)
@@ -112,4 +101,5 @@ def inform_clients_about_others(client_connected):
 
 
 
-start_server()
+if __name__ == '__main__':
+    start_server() 
