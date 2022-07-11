@@ -12,6 +12,8 @@ Links:
 - https://pypi.org/project/dhcppython/
 - https://realpython.com/python-sockets/
 - https://www.tutorialspoint.com/python3/python_multithreading.htm
+- https://www.geeksforgeeks.org/gui-chat-application-using-tkinter-in-python/
+- https://github.com/sachans/Chat-App/blob/master/client.py
 
 
 Que es?
