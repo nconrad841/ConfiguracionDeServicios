@@ -8,6 +8,7 @@ import datetime
 import threading
 import time
 import argparse
+import queue
 
 server = None
 HOST_ADDR = "127.0.0.1"
@@ -23,23 +24,50 @@ def start_server():
     global HOST_ADDR, HOST_PORT
     if IS_TCP:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #for UDP: socket.SOCK_DGRAM
+        server.bind((HOST_ADDR, HOST_PORT))
+        server.listen(max_clients)  # server is listening for client connection
+        accept_clients_TCP(server)
     else:
-        server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-    server.bind((HOST_ADDR, HOST_PORT))
-    server.listen(max_clients)  # server is listening for client connection
+        server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        server.bind((HOST_ADDR, HOST_PORT))
+        data, addr = server.recvfrom(1024)
 
-    accept_clients(server)
+def RecvData(sock,recvPackets):
+    while True:
+        data,addr = sock.recvfrom(1024)
+        recvPackets.put((data,addr))
 
-def accept_clients(server):
+def RunServer():
+    clients = set()
+    recvPackets = queue.Queue()
+    threading.Thread(target=RecvData,args=(server,recvPackets)).start()
+
+    while True:
+        while not recvPackets.empty():
+            data,addr = recvPackets.get()
+            if addr not in clients:
+                clients.add(addr)
+                continue
+            clients.add(addr)
+            data = data.decode('utf-8')
+            if data.endswith('qqq'):
+                clients.remove(addr)
+                continue
+            print(str(addr)+data)
+            for c in clients:
+                if c!=addr:
+                    server.sendto(data.encode('utf-8'),c)
+    
+
+def accept_clients_TCP(server):
     global max_clients
     print(f'Accepting max. {max_clients} Clients: ')
     while True:
-
         client, addr = server.accept()
-        threading._start_new_thread(receive_send_client_message, (client, addr))
+        threading._start_new_thread(receive_send_client_message_TCP, (client, addr))
         
 
-def receive_send_client_message(client_connected, client_ip_addr):
+def receive_send_client_message_TCP(client_connected, client_ip_addr):
     global server, clients, clients_names
     client_name = ''
     client_name = client_connected.recv(4096).decode()
@@ -50,7 +78,7 @@ def receive_send_client_message(client_connected, client_ip_addr):
         print(msg)
 
         client_connected.send(msg.encode())
-        receive_send_client_message(client_connected, client_ip_addr)
+        receive_send_client_message_TCP(client_connected, client_ip_addr)
 
     # client accepted
     else:
@@ -84,8 +112,8 @@ def receive_send_client_message(client_connected, client_ip_addr):
                 inform_clients_about_others()
                 continue
 
-            msg = f'{client_name} -> {data}'
-            print(msg)
+            msg = f'{data}'
+            #print(msg)
             
             # send message to all
             for client in clients:
@@ -120,12 +148,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.TCP == args.UDP:
-        print('Something went wrong, set one flag for TCP or UDP')
+        print('Something went wrong, set one flag --TCP or --UDP')
         exit()
     if args.TCP:
-        print('Service running with TCP')
+        print('Service starting TCP')
     elif args.UDP:
-        print('Service running with UDP')
+        print('Service starting UDP')
         IS_TCP = False
 
     start_server() 

@@ -1,4 +1,4 @@
-from socket import AF_INET, socket, SOCK_STREAM
+from socket import AF_INET, socket, SOCK_STREAM, SOCK_DGRAM
 import random
 from random import randint
 from time import sleep
@@ -7,8 +7,11 @@ from tkinter import font
 from tkinter import ttk
 from threading import Thread
 import time
+from datetime import datetime
 import argparse
 import os
+from random import choice
+from string import ascii_uppercase
 
 SERVER_ADDR = "127.0.0.1"
 SERVER_PORT = 8080
@@ -21,7 +24,7 @@ client = None
 username = ""
 
 def receive_message_from_server():
-    global client, username
+    global client, username, RUN_TEST
     while True:
         #connection still available
         if client.fileno() == -1:
@@ -35,24 +38,28 @@ def receive_message_from_server():
                 continue
             elif 'Server -> Connection successfull with' in msg_from_server:
                 username = msg_from_server[39:-1]
-                top.title(f"Client {username}")
-                continue
             print(msg_from_server)
             msg_list.insert(END, msg_from_server)
 
         except ConnectionResetError:
-             print(f'Client:\tConnection closed with Server -> ConnectionResetError')
-             break
+            print(f'Client:\tConnection closed with Server -> ConnectionResetError')
+            break
+        except ConnectionAbortedError:
+            print(f'Client:\tConnection closed with Server -> ConnectionAbortedError')
+            break
         
 
 def send_message_to_server(event=None):
     global client, username
 
-    msg = my_msg.get()
+    msg = f'{my_msg.get()}'
     my_msg.set("")  # Clears input field.
 
     if username == '':
-        username = msg
+        username = my_msg.get()
+    else:
+        msg = f'{username} -> {msg}'
+
 
     # send message
     client.send(msg.encode())
@@ -67,6 +74,49 @@ def on_closing(event=None):
     my_msg.set("{quit}")
     send_message_to_server()
 
+###################################################
+# TEST SECTION
+def receive_message_for_test():
+    global client, username, RUN_TEST
+    while True:
+        #connection still available
+        if client.fileno() == -1:
+            print(f'Client -> Connection closed with Server')
+            break
+        try:
+            msg_from_server = client.recv(BUFSIZ).decode()
+            if not "Server -> " in msg_from_server:
+                with open(f'{username}.txt', 'a') as f:
+                    f.write(f' --- {msg_from_server}, {str(datetime.now())} --- \n')
+            
+        except ConnectionResetError:
+            print(f'Client:\tConnection closed with Server -> ConnectionResetError')
+            break
+        except ConnectionAbortedError:
+            print(f'Client:\tConnection closed with Server -> ConnectionAbortedError')
+            break
+    print("Test run aborted")
+
+def run_test():
+    global client, username
+    if username == '':
+        username = ''.join(choice(ascii_uppercase) for i in range(12))
+    client.send(username.encode())
+
+    # receiving message 
+    receive_thread = Thread(target=receive_message_for_test)
+    receive_thread.start()
+
+    i = 0
+    while True:
+        msg = f'{username} -> {i}: {datetime.now()}'
+        client.send(msg.encode())
+        i += 1
+        time.sleep(1) # importatn variable for testing speed
+
+###################################################
+
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--username", '-u', help="Username", default="")
@@ -74,7 +124,28 @@ parser.add_argument("--TCP", '-T', help="Use TCP", default=False, action="store_
 parser.add_argument("--UDP", '-U', help="Use UDP", default=False, action="store_true")
 parser.add_argument("--RUN-TEST", '-R', help="Run a test for velocidad, usabilidad, seguridad", default=False, action="store_true")
 args = parser.parse_args()
+
 username = args.username
+IS_TCP = args.TCP
+
+if args.TCP == args.UDP:
+    print('Something went wrong, set one flag --TCP or --UDP')
+    exit()
+
+if IS_TCP:
+    print('Running TCP')
+    client = socket(AF_INET, SOCK_STREAM) #for UDP: socket.SOCK_DGRAM
+    client.connect((SERVER_ADDR, SERVER_PORT))
+else:
+    client = socket(AF_INET, SOCK_DGRAM) 
+    client.bind((SERVER_ADDR, SERVER_PORT))
+
+
+
+if args.RUN_TEST:
+    print('Test is now running')
+    run_test()
+    exit()
 
 
 #start GUI
@@ -115,15 +186,6 @@ send_button.pack()
 top.protocol("WM_DELETE_WINDOW", on_closing)
 #############################################
 
-if IS_TCP:
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #for UDP: socket.SOCK_DGRAM
-else:
-    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-client.connect((SERVER_ADDR, SERVER_PORT))
-
-
-if RUN_TEST:
-    username = os.urandom(8)
 
 receive_thread = Thread(target=receive_message_from_server)
 receive_thread.start()
@@ -132,5 +194,5 @@ receive_thread.start()
 if username != '':
     client.send(username.encode())
 
-# for start of GUI  Interface
+# for start of GUI Interface
 mainloop()
