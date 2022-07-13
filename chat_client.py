@@ -118,7 +118,7 @@ def run_test():
     while True:
         
         msg = f'{username} -> {i}: {datetime.now()}'
-        msg = msg + ', ' + ''.join(choice(ascii_uppercase) for i in range(200))                
+        msg = msg + ', ' + ''.join(choice(ascii_uppercase) for i in range(PA))                
 
         client.send(msg.encode())
         i += 1
