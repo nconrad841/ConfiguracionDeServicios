@@ -79,7 +79,7 @@ def accept_clients_UDP(server):
             # send message to all
             # in clients are the adresses stored
             msg = f'{data}'
-            print(msg)
+            #print(msg)
             for client in clients:     
                 if client == addr:
                     #print(f'Data should not be sent to: {client_names[clients.index(addr)]}')

@@ -114,7 +114,13 @@ def run_test():
 
     i = 0
     while True:
-        msg = f'{username} -> {i}: {datetime.now()}'
+        # sendig fast messaged
+        if True:
+            msg = f'{username} -> {i}: {datetime.now()}'
+        #sendig ling messages
+        else:
+            msg = ''.join(choice(ascii_uppercase) for i in range(12))
+            msg = f'{username} -> {i}: {msg}'
         client.send(msg.encode())
         i += 1
         time.sleep(1) # importatn variable for testing speed
