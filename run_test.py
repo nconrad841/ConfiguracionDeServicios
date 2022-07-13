@@ -3,7 +3,7 @@ from threading import Thread
 import time
 
 TCP = False
-client_num = 5
+client_num = 2
 clients = []
 
 def start_server():
@@ -23,10 +23,15 @@ server = Thread(target=start_server)
 server.start()
 
 time.sleep(0.5)
-print('starting server for testing')
+print('Starting server for testing')
+if TCP:
+    print('Starting with TCP')
+else:
+    print('Starting with UDP')
 
 
 for i in range(0, client_num):
+    print(f'Starting {i} client')
     client = Thread(target=start_client)
     client.start()
     clients.append(client)

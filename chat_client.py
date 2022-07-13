@@ -32,20 +32,22 @@ def receive_message_from_server():
             break
         try:
             msg_from_server = client.recv(BUFSIZ).decode()
+            print(msg_from_server)
+
             if msg_from_server == (f'Server -> \'{username}\' invalid, already in list, chose an other one'):
                 msg_list.insert(END, 'Username already in use, choose other username')
                 username = ''
                 continue
-            elif 'Server -> Connection successfull with' in msg_from_server:
+            elif ('Server -> Connection successfull with' in msg_from_server) and (username == ''):
                 username = msg_from_server[39:-1]
-            print(msg_from_server)
+
             msg_list.insert(END, msg_from_server)
 
         except ConnectionResetError:
-            print(f'Client:\tConnection closed with Server -> ConnectionResetError')
+            print(f'Client -> Connection closed with Server, ConnectionResetError')
             break
         except ConnectionAbortedError:
-            print(f'Client:\tConnection closed with Server -> ConnectionAbortedError')
+            print(f'Client -> Connection closed with Server, ConnectionAbortedError')
             break
         
 
@@ -53,17 +55,20 @@ def send_message_to_server(event=None):
     global client, username
 
     msg = f'{my_msg.get()}'
-    my_msg.set("")  # Clears input field.
 
-    if username == '':
+    if username == '': # user just entered username
         username = my_msg.get()
+        if username == '':
+            pass
     else:
         msg = f'{username} -> {msg}'
+
+    my_msg.set("")  # Clears input field
 
 
     # send message
     client.send(msg.encode())
-    msg_list.insert(END, f'{username} -> {msg}')
+    msg_list.insert(END, f'{msg}')
 
     if msg == "{quit}":
         client.close()
@@ -127,6 +132,7 @@ args = parser.parse_args()
 
 username = args.username
 IS_TCP = args.TCP
+RUN_TEST = args.RUN_TEST
 
 if args.TCP == args.UDP:
     print('Something went wrong, set one flag --TCP or --UDP')
@@ -138,7 +144,7 @@ if IS_TCP:
     client.connect((SERVER_ADDR, SERVER_PORT))
 else:
     client = socket(AF_INET, SOCK_DGRAM) 
-    client.bind((SERVER_ADDR, SERVER_PORT))
+    client.connect((SERVER_ADDR, SERVER_PORT))
 
 
 

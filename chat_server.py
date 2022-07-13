@@ -16,12 +16,13 @@ HOST_PORT = 8080
 IS_TCP = True
 
 clients = []
-clients_names = []
+client_names = []
 max_clients = 5
 
 def start_server():
     print(f'Starting Server...')
     global HOST_ADDR, HOST_PORT
+
     if IS_TCP:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #for UDP: socket.SOCK_DGRAM
         server.bind((HOST_ADDR, HOST_PORT))
@@ -30,34 +31,60 @@ def start_server():
     else:
         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server.bind((HOST_ADDR, HOST_PORT))
-        data, addr = server.recvfrom(1024)
+        accept_clients_UDP(server)
 
-def RecvData(sock,recvPackets):
+def RecvData_UDP(server, recvPackets):
     while True:
-        data,addr = sock.recvfrom(1024)
+        try:
+            data, addr = server.recvfrom(1024)
+        except ConnectionResetError:
+            print('Some host disconnected {addr}, {data}')
+            continue
         recvPackets.put((data,addr))
 
-def RunServer():
-    clients = set()
+def accept_clients_UDP(server):
+    global clients, client_names
+
     recvPackets = queue.Queue()
-    threading.Thread(target=RecvData,args=(server,recvPackets)).start()
+    threading.Thread(target=RecvData_UDP,args=(server,recvPackets)).start()
 
     while True:
         while not recvPackets.empty():
-            data,addr = recvPackets.get()
-            if addr not in clients:
-                clients.add(addr)
-                continue
-            clients.add(addr)
+            data, addr = recvPackets.get()
             data = data.decode('utf-8')
-            if data.endswith('qqq'):
-                clients.remove(addr)
+            
+            #new client -> 1. message is username
+            if (addr not in clients):
+                client_name = data
+                # username already in use
+                if client_name in client_names:
+                    msg = f'Server -> \'{client_name}\' invalid, already in list, chose an other one'
+                    server.sendto(msg.encode(), addr)
+                    continue
+                
+                # username accepted
+                clients.append(addr)                
+                client_names.append(client_name)
+                msg = f'Server -> Connection successfull with \'{client_name}\''
+                server.sendto(msg.encode(), addr)
+                
+                #inform_clients_about_others() # TODO: Check that
                 continue
-            print(str(addr)+data)
-            for c in clients:
-                if c!=addr:
-                    server.sendto(data.encode('utf-8'),c)
-    
+                
+
+            if data == '{info}': 
+                #inform_clients_about_others()
+                continue
+        
+            # send message to all
+            # in clients are the adresses stored
+            msg = f'{data}'
+            print(msg)
+            for client in clients:     
+                if client == addr:
+                    #print(f'Data should not be sent to: {client_names[clients.index(addr)]}')
+                    continue
+                server.sendto(msg.encode(), client)
 
 def accept_clients_TCP(server):
     global max_clients
@@ -66,17 +93,15 @@ def accept_clients_TCP(server):
         client, addr = server.accept()
         threading._start_new_thread(receive_send_client_message_TCP, (client, addr))
         
-
 def receive_send_client_message_TCP(client_connected, client_ip_addr):
-    global server, clients, clients_names
+    global server, clients, client_names
     client_name = ''
     client_name = client_connected.recv(4096).decode()
     print(f'Server -> \'{client_name}\' knocks at the door..')
 
-    if client_name in clients_names:
+    if client_name in client_names:
         msg = f'Server -> \'{client_name}\' invalid, already in list, chose an other one'
         print(msg)
-
         client_connected.send(msg.encode())
         receive_send_client_message_TCP(client_connected, client_ip_addr)
 
@@ -87,7 +112,7 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
         client_connected.send(msg.encode())
 
         clients.append(client_connected)
-        clients_names.append(client_name)
+        client_names.append(client_name)
 
         inform_clients_about_others()
 
@@ -97,14 +122,14 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
             except ConnectionResetError:
                 print(f'Server -> Connection closed with \'{client_name}\' -> ConnectionResetError')
                 client_connected.close()
-                clients_names.remove(client_name)
+                client_names.remove(client_name)
                 clients.remove(client_connected)
                 break
             
             if (not data) or (data == '\{quit\}') or (client_connected.fileno() == -1):
                 print(f'Server -> Connection closed with \'{client_name}\'')
                 client_connected.close()
-                clients_names.remove(client_name)
+                client_names.remove(client_name)
                 clients.remove(client_connected)
                 break
                 
@@ -113,7 +138,7 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
                 continue
 
             msg = f'{data}'
-            #print(msg)
+            print(msg)
             
             # send message to all
             for client in clients:
@@ -124,16 +149,16 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
 
 
 def inform_clients_about_others():
-    global clients_names, clients
-    if len(clients) != len(clients_names):
+    global client_names, clients
+    if len(clients) != len(client_names):
         print('something went wrong')
         exit()
     if len(clients) != 0: 
         msg = 'Server -> Chatmembers are now: '
-        names = ' '.join(clients_names).replace(' ', ', ')
+        names = ' '.join(client_names).replace(' ', ', ')
         msg += names
 
-        for name, client in zip(clients_names, clients):
+        for name, client in zip(client_names, clients):
             
             client.send(msg.encode())
         
