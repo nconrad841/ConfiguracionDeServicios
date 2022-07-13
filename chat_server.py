@@ -33,6 +33,7 @@ def start_server():
         server.bind((HOST_ADDR, HOST_PORT))
         accept_clients_UDP(server)
 
+
 def RecvData_UDP(server, recvPackets):
     while True:
         try:
@@ -68,18 +69,27 @@ def accept_clients_UDP(server):
                 msg = f'Server -> Connection successfull with \'{client_name}\''
                 server.sendto(msg.encode(), addr)
                 
-                #inform_clients_about_others() # TODO: Check that
+                inform_clients_about_others(server, clients) 
                 continue
                 
+            msg = f'{data}'
+            print(msg)
 
-            if data == '{info}': 
-                #inform_clients_about_others()
+            if '{info}' in msg: 
+                inform_clients_about_others(server, [addr])
                 continue
+
+            if (not data) or ('{quit}' in data):
+                print(f'Server -> Connection closed with \'{client_name}\'')
+                client_names.remove(client_name)
+                clients.remove(addr)
+                inform_clients_about_others(server, clients) 
+                break
+
         
             # send message to all
             # in clients are the adresses stored
-            msg = f'{data}'
-            #print(msg)
+            
             for client in clients:     
                 if client == addr:
                     #print(f'Data should not be sent to: {client_names[clients.index(addr)]}')
@@ -108,13 +118,13 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
     # client accepted
     else:
         msg = f'Server -> Connection successfull with \'{client_name}\''
-        #print(msg)
+        print(msg)
         client_connected.send(msg.encode())
 
         clients.append(client_connected)
         client_names.append(client_name)
 
-        inform_clients_about_others()
+        inform_clients_about_others(server, clients)
 
         while True:
             try:
@@ -126,19 +136,22 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
                 clients.remove(client_connected)
                 break
             
-            if (not data) or (data == '{quit}') or (client_connected.fileno() == -1):
+            if (not data) or ('{quit}' in data) or (client_connected.fileno() == -1):
                 print(f'Server -> Connection closed with \'{client_name}\'')
                 client_connected.close()
                 client_names.remove(client_name)
                 clients.remove(client_connected)
+                inform_clients_about_others(server, clients)
                 break
                 
-            if data == '{info}': 
-                inform_clients_about_others()
-                continue
-
             msg = f'{data}'
             print(msg)
+
+            if '{info}' in msg: 
+                inform_clients_about_others(server, [client_connected])
+                continue
+
+            
             
             # send message to all
             for client in clients:
@@ -148,19 +161,23 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
 
 
 
-def inform_clients_about_others():
+def inform_clients_about_others(server, addrs):
     global client_names, clients
     if len(clients) != len(client_names):
-        print('something went wrong')
+        print('Something went wrong')
         exit()
     if len(clients) != 0: 
         msg = 'Server -> Chatmembers are now: '
         names = ' '.join(client_names).replace(' ', ', ')
         msg += names
 
-        for name, client in zip(client_names, clients):
-            
-            client.send(msg.encode())
+        if IS_TCP:            
+            for addr in addrs:
+                addr.send(msg.encode())
+        else:
+            for addr in addrs:
+                server.sendto(msg.encode(), addr)
+
         
 
 

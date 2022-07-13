@@ -19,6 +19,8 @@ BUFSIZ = 4096
 
 IS_TCP = True
 RUN_TEST = False
+TEST_PACKET_SIZE = 200
+TEST_DELAY = 0.5
 
 client = None
 username = ""
@@ -29,6 +31,7 @@ def receive_message_from_server():
         #connection still available
         if client.fileno() == -1:
             print(f'Client -> Connection closed with Server')
+            exit()
             break
         try:
             msg_from_server = client.recv(BUFSIZ).decode()
@@ -45,9 +48,11 @@ def receive_message_from_server():
 
         except ConnectionResetError:
             print(f'Client -> Connection closed with Server, ConnectionResetError')
+            exit()
             break
         except ConnectionAbortedError:
             print(f'Client -> Connection closed with Server, ConnectionAbortedError')
+            exit()
             break
         
 
@@ -98,9 +103,11 @@ def receive_message_for_test():
             
         except ConnectionResetError:
             print(f'Client:\tConnection closed with Server -> ConnectionResetError')
+            exit()
             break
         except ConnectionAbortedError:
             print(f'Client:\tConnection closed with Server -> ConnectionAbortedError')
+            exit()
             break
     print("Test run aborted")
 
@@ -118,11 +125,11 @@ def run_test():
     while True:
         
         msg = f'{username} -> {i}: {datetime.now()}'
-        msg = msg + ', ' + ''.join(choice(ascii_uppercase) for i in range(PA))                
+        msg = msg + ', ' + ''.join(choice(ascii_uppercase) for i in range(TEST_PACKET_SIZE))                
 
         client.send(msg.encode())
         i += 1
-        time.sleep(0.01) # importatn variable for testing speed
+        time.sleep(TEST_DELAY) # importatn variable for testing speed
 
 ###################################################
 
