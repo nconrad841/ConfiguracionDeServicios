@@ -92,7 +92,7 @@ def receive_message_for_test():
             msg_from_server = client.recv(BUFSIZ).decode()
             if not "Server -> " in msg_from_server:
                 if IS_TCP: filenname = username + '_TCP'
-                elif IS_TCP: filenname = username + '_UDP'
+                else: filenname = username + '_UDP'
                 with open(f'{filenname}.txt', 'a') as f:
                     f.write(f' --- {msg_from_server}, {str(datetime.now())} --- \n')
             
@@ -118,7 +118,7 @@ def run_test():
     while True:
         
         msg = f'{username} -> {i}: {datetime.now()}'
-        msg = msg + ', ' + ''.join(choice(ascii_uppercase) for i in range(20000))                
+        msg = msg + ', ' + ''.join(choice(ascii_uppercase) for i in range(200))                
 
         client.send(msg.encode())
         i += 1

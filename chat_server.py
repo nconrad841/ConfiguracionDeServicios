@@ -108,7 +108,7 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
     # client accepted
     else:
         msg = f'Server -> Connection successfull with \'{client_name}\''
-        print(msg)
+        #print(msg)
         client_connected.send(msg.encode())
 
         clients.append(client_connected)

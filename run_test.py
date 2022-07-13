@@ -5,7 +5,7 @@ import socket
 import struct
 import binascii
 
-TCP = False
+TCP = True
 client_num = 3
 clients = []
 test = '' # segirudad, usability
