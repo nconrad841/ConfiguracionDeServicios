@@ -32,7 +32,7 @@ def receive_message_from_server():
             break
         try:
             msg_from_server = client.recv(BUFSIZ).decode()
-            print(msg_from_server)
+            #print(msg_from_server)
 
             if msg_from_server == (f'Server -> \'{username}\' invalid, already in list, chose an other one'):
                 msg_list.insert(END, 'Username already in use, choose other username')
@@ -91,7 +91,9 @@ def receive_message_for_test():
         try:
             msg_from_server = client.recv(BUFSIZ).decode()
             if not "Server -> " in msg_from_server:
-                with open(f'{username}.txt', 'a') as f:
+                if IS_TCP: filenname = username + '_TCP'
+                elif IS_TCP: filenname = username + '_UDP'
+                with open(f'{filenname}.txt', 'a') as f:
                     f.write(f' --- {msg_from_server}, {str(datetime.now())} --- \n')
             
         except ConnectionResetError:
@@ -114,16 +116,13 @@ def run_test():
 
     i = 0
     while True:
-        # sendig fast messaged
-        if True:
-            msg = f'{username} -> {i}: {datetime.now()}'
-        #sendig ling messages
-        else:
-            msg = ''.join(choice(ascii_uppercase) for i in range(12))
-            msg = f'{username} -> {i}: {msg}'
+        
+        msg = f'{username} -> {i}: {datetime.now()}'
+        msg = msg + ', ' + ''.join(choice(ascii_uppercase) for i in range(20000))                
+
         client.send(msg.encode())
         i += 1
-        time.sleep(1) # importatn variable for testing speed
+        time.sleep(0.01) # importatn variable for testing speed
 
 ###################################################
 

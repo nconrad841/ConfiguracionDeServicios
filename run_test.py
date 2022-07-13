@@ -5,10 +5,10 @@ import socket
 import struct
 import binascii
 
-TCP = True
+TCP = False
 client_num = 3
 clients = []
-test = 'seguridad' # segirudad, usability
+test = '' # segirudad, usability
 
  
 def start_server():
@@ -47,9 +47,9 @@ match test:
             ip_header = struct.unpack("!12s4s4s", ipheader)
             print ("Source IP:" + socket.inet_ntoa(ip_header[1]) + " Destination IP:" + socket.inet_ntoa(ip_header[2]))
     case _:
-        pass
-for i in range(0, client_num):
-    print(f'Starting {i} client')
-    client = Thread(target=start_client)
-    client.start()
-    clients.append(client)
+        
+        for i in range(0, client_num):
+            print(f'Starting {i} client')
+            client = Thread(target=start_client)
+            client.start()
+            clients.append(client)

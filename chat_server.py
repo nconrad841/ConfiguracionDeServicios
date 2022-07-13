@@ -126,7 +126,7 @@ def receive_send_client_message_TCP(client_connected, client_ip_addr):
                 clients.remove(client_connected)
                 break
             
-            if (not data) or (data == '\{quit\}') or (client_connected.fileno() == -1):
+            if (not data) or (data == '{quit}') or (client_connected.fileno() == -1):
                 print(f'Server -> Connection closed with \'{client_name}\'')
                 client_connected.close()
                 client_names.remove(client_name)
