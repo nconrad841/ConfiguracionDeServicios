@@ -66,7 +66,9 @@ def send_message_to_server(event=None):
         if username == '':
             pass
     else:
-        msg = f'{username} -> {msg}'
+        now = datetime.now()
+        date_time = now.strftime("%m/%d/%Y, %H:%M")
+        msg = f'{username} [{date_time}] -> {msg}'
 
     my_msg.set("")  # Clears input field
 
